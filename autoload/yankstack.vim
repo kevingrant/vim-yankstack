@@ -19,7 +19,7 @@ function! s:paste_with_key(key, mode, register, count)
 endfunction
 
 function! s:paste_from_yankstack(key, mode, register, count, is_new)
-  echom "In paste_from_yankstack" a:key a:mode a:is_new
+  " echom "In paste_from_yankstack" a:key a:mode a:is_new
 
   let keys = a:count . a:key
   let keys = (a:register == s:default_register()) ? keys : ('"' . a:register . keys)
@@ -151,23 +151,26 @@ function! s:show_yank(yank, index)
   echohl None
 endfunction
 
+function! s:map_key(key, mode)
+  let rhs = maparg(a:key, a:mode)
+  return empty(rhs) ? a:key : rhs
+endfunction
+
 function! yankstack#setup()
   if exists('g:yankstack_did_setup') | return | endif
   let g:yankstack_did_setup = 1
 
-  let yank_keys  = ['c', 'C', 'd', 'D', 's', 'S', 'x', 'X', 'y', 'Y']
-  let paste_keys = ['p', 'P', 'gp', 'gP']
   let word_characters = split("qwertyuiopasdfghjklzxcvbnm1234567890_", '\zs')
 
-  for key in yank_keys
-    exec 'nnoremap <expr>'  key '<SID>yank_with_key("' . key . '")'
-    exec 'xnoremap <expr>'  key '<SID>yank_with_key("' . key . '")'
+  for key in g:yankstack_yank_keys
+    exec 'nnoremap <expr>'  key '<SID>yank_with_key("' . s:map_key(key, "n") . '")'
+    exec 'xnoremap <expr>'  key '<SID>yank_with_key("' . s:map_key(key, "x") . '")'
   endfor
 
   let clear_cmd = ':echo ""<CR>'
-  for key in paste_keys
-    exec 'nnoremap' key ':<C-u>call <SID>paste_with_key("' . key . '", "n", v:register, v:count1)<CR>' . clear_cmd
-    exec 'xnoremap' key ':<C-u>call <SID>paste_with_key("' . key . '", "v", v:register, v:count1)<CR>' . clear_cmd
+  for key in g:yankstack_paste_keys
+    exec 'nnoremap' key ':<C-u>call <SID>paste_with_key("' . s:map_key(key, "n") . '", "n", v:register, v:count1)<CR>' . clear_cmd
+    exec 'xnoremap' key ':<C-u>call <SID>paste_with_key("' . s:map_key(key, "x") . '", "v", v:register, v:count1)<CR>' . clear_cmd
   endfor
 
   for key in word_characters
@@ -195,3 +198,10 @@ if !exists('g:yankstack_map_keys') || g:yankstack_map_keys
   imap <M-P> <Plug>yankstack_substitute_newer_paste
 endif
 
+if !exists('g:yankstack_yank_keys')
+  let g:yankstack_yank_keys = ['c', 'C', 'd', 'D', 's', 'S', 'x', 'X', 'y', 'Y']
+endif
+
+if !exists('g:yankstack_paste_keys')
+  let g:yankstack_paste_keys = ['p', 'P', 'gp', 'gP']
+endif
