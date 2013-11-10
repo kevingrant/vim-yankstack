@@ -162,8 +162,11 @@ function! yankstack#setup()
 
   let word_characters = split("qwertyuiopasdfghjklzxcvbnm1234567890_", '\zs')
 
-  for key in g:yankstack_yank_keys
+  for key in g:yankstack_yank_nkeys
     exec 'nnoremap <expr>'  key '<SID>yank_with_key("' . s:map_key(key, "n") . '")'
+  endfor
+
+  for key in g:yankstack_yank_xkeys
     exec 'xnoremap <expr>'  key '<SID>yank_with_key("' . s:map_key(key, "x") . '")'
   endfor
 
@@ -198,8 +201,12 @@ if !exists('g:yankstack_map_keys') || g:yankstack_map_keys
   imap <M-P> <Plug>yankstack_substitute_newer_paste
 endif
 
-if !exists('g:yankstack_yank_keys')
-  let g:yankstack_yank_keys = ['c', 'C', 'd', 'D', 's', 'S', 'x', 'X', 'y', 'Y']
+if !exists('g:yankstack_yank_nkeys')
+  let g:yankstack_yank_nkeys = ['c', 'C', 'd', 'D', 's', 'S', 'x', 'X', 'y', 'Y']
+endif
+
+if !exists('g:yankstack_yank_xkeys')
+  let g:yankstack_yank_xkeys = ['c', 'C', 'd', 'D', 's', 'S', 'x', 'X', 'y', 'Y']
 endif
 
 if !exists('g:yankstack_paste_keys')
